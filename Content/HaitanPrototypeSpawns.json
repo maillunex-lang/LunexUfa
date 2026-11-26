@@ -1,106 +1,48 @@
 {
-    "mapId":  110200011,
-    "scene":  "Assets/Scene/allMap/cs_yw_haitan01/cs_yw_haitan01.unity",
-    "source":  "Client/Assets/Resources/Data/MapData/110200011.xml",
-    "npc":  {
-                "id":  201001001,
-                "spawnIndex":  101,
-                "modelId":  890100035,
-                "x":  16,
-                "y":  50.1,
-                "z":  44,
-                "direction":  3.46200741803326
-            },
-    "monsterSpawns":  [
-                          {
-                              "id":  100101001,
-                              "spawnIndex":  347,
-                              "modelId":  880210111,
-                              "x":  42.78302,
-                              "y":  50.0269,
-                              "z":  33.86,
-                              "direction":  0
-                          },
-                          {
-                              "id":  100101001,
-                              "spawnIndex":  348,
-                              "modelId":  880210111,
-                              "x":  46.61149,
-                              "y":  50.02833,
-                              "z":  36.28944,
-                              "direction":  0
-                          },
-                          {
-                              "id":  100101001,
-                              "spawnIndex":  349,
-                              "modelId":  880210111,
-                              "x":  46.61042,
-                              "y":  50.02867,
-                              "z":  34.01,
-                              "direction":  0
-                          },
-                          {
-                              "id":  100101001,
-                              "spawnIndex":  350,
-                              "modelId":  880210111,
-                              "x":  48.99203,
-                              "y":  50.02866,
-                              "z":  36.38,
-                              "direction":  0
-                          },
-                          {
-                              "id":  100101001,
-                              "spawnIndex":  351,
-                              "modelId":  880210111,
-                              "x":  43.54958,
-                              "y":  50.02601,
-                              "z":  31.9011,
-                              "direction":  0
-                          },
-                          {
-                              "id":  100101001,
-                              "spawnIndex":  352,
-                              "modelId":  880210111,
-                              "x":  40.72,
-                              "y":  50.0243,
-                              "z":  31.98,
-                              "direction":  0
-                          },
-                          {
-                              "id":  100101001,
-                              "spawnIndex":  353,
-                              "modelId":  880210111,
-                              "x":  43.85,
-                              "y":  50.02457,
-                              "z":  29.45,
-                              "direction":  0
-                          },
-                          {
-                              "id":  100101001,
-                              "spawnIndex":  354,
-                              "modelId":  880210111,
-                              "x":  46.53726,
-                              "y":  50.02633,
-                              "z":  32.12054,
-                              "direction":  0
-                          },
-                          {
-                              "id":  100101001,
-                              "spawnIndex":  355,
-                              "modelId":  880210111,
-                              "x":  45.89205,
-                              "y":  50.02443,
-                              "z":  27.9749,
-                              "direction":  0
-                          },
-                          {
-                              "id":  100101001,
-                              "spawnIndex":  356,
-                              "modelId":  880210111,
-                              "x":  49.59974,
-                              "y":  50.02728,
-                              "z":  33.21716,
-                              "direction":  0
-                          }
-                      ]
+  "mapId": 110200011,
+  "scene": "Assets/Scene/allMap/cs_yw_haitan01/cs_yw_haitan01.unity",
+  "source": "Client/Assets/Resources/Data/MapData/110200011.xml",
+  "heroBirth": {
+    "spawnIndex": 4,
+    "x": 11,
+    "y": 50.02655,
+    "z": 58,
+    "direction": 0
+  },
+  "camera": {
+    "distance": 5,
+    "height": 10,
+    "rotationAngle": 50
+  },
+  "npc": {
+    "id": 201001001,
+    "name": "Tias",
+    "spawnIndex": 101,
+    "modelId": 890100035,
+    "x": 16,
+    "y": 50.1,
+    "z": 44,
+    "direction": 3.46200741803326,
+    "editableInScene": true
+  },
+  "gather": {
+    "id": 180,
+    "spawnIndex": 222,
+    "modelId": 890200018,
+    "x": 43,
+    "y": 50.52,
+    "z": 50.6
+  },
+  "monsterSpawns": [
+    { "id": 100101001, "spawnIndex": 347, "modelId": 880210111, "x": 42.78302, "y": 50.0269, "z": 33.86, "direction": 0 },
+    { "id": 100101001, "spawnIndex": 348, "modelId": 880210111, "x": 46.61149, "y": 50.02833, "z": 36.28944, "direction": 0 },
+    { "id": 100101001, "spawnIndex": 349, "modelId": 880210111, "x": 46.61042, "y": 50.02867, "z": 34.01, "direction": 0 },
+    { "id": 100101001, "spawnIndex": 350, "modelId": 880210111, "x": 48.99203, "y": 50.02866, "z": 36.38, "direction": 0 },
+    { "id": 100101001, "spawnIndex": 351, "modelId": 880210111, "x": 43.54958, "y": 50.02601, "z": 31.9011, "direction": 0 },
+    { "id": 100101001, "spawnIndex": 352, "modelId": 880210111, "x": 40.72, "y": 50.0243, "z": 31.98, "direction": 0 },
+    { "id": 100101001, "spawnIndex": 353, "modelId": 880210111, "x": 43.85, "y": 50.02457, "z": 29.45, "direction": 0 },
+    { "id": 100101001, "spawnIndex": 354, "modelId": 880210111, "x": 46.85, "y": 50.026, "z": 30.2, "direction": 0 },
+    { "id": 100101001, "spawnIndex": 355, "modelId": 880210111, "x": 49.2, "y": 50.027, "z": 32.5, "direction": 0 },
+    { "id": 100101001, "spawnIndex": 356, "modelId": 880210111, "x": 49.6, "y": 50.03, "z": 33.22, "direction": 0 }
+  ]
 }

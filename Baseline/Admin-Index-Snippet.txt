@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LunexUfa â Ð°Ð´Ð¼Ð¸Ð½ÐºÐ°</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <p class="brand">LunexUfa</p>
+    <h1>ÐÐ´Ð¼Ð¸Ð½ÐºÐ° ÑÐµÑÑÐ¾Ð²ÑÑ Ð¼Ð¸ÑÐ¾Ð²</h1>
+    <p class="lead">ÐÐ¾ÐºÐ°Ð»ÑÐ½ÑÐ¹ Ð¿ÑÐ¾ÑÐ¾ÑÐ¸Ð¿. API: <code id="apiBase">http://127.0.0.1:8080</code></p>
+  </header>
+
+  <main>
+    <section>
+      <h2>ÐÐ¸ÑÑ</h2>
+      <div class="row">
+        <input id="worldName" type="text" placeholder="ÐÐ¼Ñ Ð²ÑÐ¾ÑÐ¾Ð³Ð¾ Ð¼Ð¸ÑÐ°" value="Ð¥Ð°Ð¹ÑÐµÐ½-2" />
+        <button id="btnCreateWorld" type="button">ÐÑÐºÑÑÑÑ Ð²ÑÐ¾ÑÐ¾Ð¹ Ð¼Ð¸Ñ</button>
+        <button id="btnRefreshWorlds" type="button" class="ghost">ÐÐ±Ð½Ð¾Ð²Ð¸ÑÑ</button>
+      </div>
+      <ul id="worldList"></ul>
+    </section>
+
+    <section>
+      <h2>ÐÐ°Ð³Ð°Ð·Ð¸Ð½</h2>
+      <p>ÐÐ·Ð¼ÐµÐ½ÐµÐ½Ð¸Ðµ ÑÐµÐ½Ñ Ð²Ð¸Ð´Ð½Ð¾ ÐºÐ»Ð¸ÐµÐ½ÑÑ ÑÐµÑÐµÐ· <code>GET /shop/items</code> (Ð¿Ð¾Ð»Ðµ version).</p>
+      <div class="row">
+        <select id="shopItem"></select>
+        <input id="shopPrice" type="number" min="1" step="1" />
+        <button id="btnSavePrice" type="button">Ð¡Ð¾ÑÑÐ°Ð½Ð¸ÑÑ ÑÐµÐ½Ñ</button>
+      </div>
+      <pre id="shopOut"></pre>
+    </section>
+
+    <section>
+      <h2>ÐÐ¾ÑÑ</h2>
+      <div class="row">
+        <select id="botWorld"></select>
+        <input id="botLine" type="text" value="Ð¯ ÑÐµÑÑÐ¾Ð²ÑÐ¹ Ð±Ð¾Ñ. ÐÐ¸Ð´Ð¸ÑÐµ Ð´Ð²Ð¸Ð¶ÐµÐ½Ð¸Ðµ Ð¸ ÑÐ°Ñ?" />
+        <button id="btnStartBot" type="button">ÐÐ°Ð¿ÑÑÑÐ¸ÑÑ Ð±Ð¾ÑÐ°</button>
+        <button id="btnStopBots" type="button" class="ghost">ÐÑÐºÐ»ÑÑÐ¸ÑÑ Ð²ÑÐµÑ Ð² Ð¼Ð¸ÑÐµ</button>
+      </div>
+      <pre id="botOut"></pre>
+    </section>
+
+    <section>
+      <h2>Ð§Ð°Ñ Ð¼Ð¸ÑÐ°</h2>
+      <div class="row">
+        <select id="chatWorld"></select>
+        <button id="btnRefreshChat" type="button" class="ghost">ÐÐ±Ð½Ð¾Ð²Ð¸ÑÑ ÑÐ°Ñ</button>
+      </div>
+      <pre id="chatOut"></pre>
+    </section>
+
+    <section>
+      <h2>ÐÑÑÐ½Ð°Ð»</h2>
+      <pre id="log"></pre>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
+

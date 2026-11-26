@@ -14,7 +14,10 @@
 | Play Mode (вместо APK) | **успех** | `Baseline\Android-Play-Results.txt`, скрин `artifacts\unity_loginui_play_now.png`, лог `Baseline\Unity-Android-Play.log` |
 | APK | **пропущен по запросу** | проверка через Editor Play / RDP |
 | ADB / устройство | нет устройств | запуск на Android-девайсе не подтверждён |
-| Перенос Haitan в Client | каркас | `Client\ProjectSettings\ProjectVersion.txt`, `Client\Assets\Editor\LunexUfa\TransferHaitan.cs` |
+| Перенос Haitan в Client | **сцена + GUID-deps** | сцена `Client\Assets\Scene\allMap\cs_yw_haitan01\...`; отчёт `Client\Haitan-Dependency-Copy-Report.txt` (≈88 copied / 7 unmapped: builtins + known missing GameDrawManager) |
+| Прототип Client overlay | **каркас** | `HaitanBootstrap` / `FollowCamera` / `PrototypeNetClient`; меню `LunexUfa/Haitan/*` |
+| Локальный Server :8080 | **smoke OK** | `python Server\run_server.py`; `Baseline\Server-Admin-Smoke.txt` |
+| Русская Admin :8090 | **smoke OK** | `python Admin\run_admin.py`; UI миры/магазин/боты/чат |
 
 ## Play Mode (проверено после разблокировки Windows)
 
@@ -42,3 +45,17 @@ Haitan: objects=1558 missingScripts=2 (GameDrawManager, HT1RsPlugin) animators=1
 ## Сценарий Haitan (данные)
 
 Birth `(11, 50.02655, 58)`; Tias `201001001` `(16, 50.1, 44)`; 10×`100101001`; collect `180` для цели `180,1`; kill `100101001,3`. Цепочка квестов 1001701–1001703.
+
+## Server / Admin smoke (локально)
+
+```
+SMOKE OK
+ - health ok
+ - enter quest=1001701 birth=(11,50.02655,58)
+ - talk -> 1001702; gather -> 1001703; kill x3
+ - shop price bump increments version
+ - bot start/chat/stop ok
+Admin UI http://127.0.0.1:8090 — 200
+```
+
+Клиентский Play поверх перенесённой сцены Haitan — следующий шаг (Unity сейчас занят Baseline LoginUI Play; меню `LunexUfa/Haitan/Open Map Scene` + `Add Prototype Bootstrap`).
