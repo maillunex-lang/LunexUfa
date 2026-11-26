@@ -13,8 +13,9 @@ public class SceneDetailObject : MonoBehaviour
 	void Awake()
 	{
 		Transform thisTransform = transform;
-        if(null != Titan.CoreEntry.gCameraMgr.MainCamera)
-            camTransform = Titan.CoreEntry.gCameraMgr.MainCamera.transform;
+		// LunexUfa prototype: no Titan.CoreEntry — use Camera.main.
+		if (Camera.main != null)
+			camTransform = Camera.main.transform;
 		int childCount = thisTransform.childCount;
 		childrenTransform = new Transform[childCount];
 		childrenActive = new bool[childCount];

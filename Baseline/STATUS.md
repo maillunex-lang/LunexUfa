@@ -59,3 +59,10 @@ Admin UI http://127.0.0.1:8090 вЂ” 200
 ```
 
 РљР»РёРµРЅС‚СЃРєРёР№ Play РїРѕРІРµСЂС… РїРµСЂРµРЅРµСЃС‘РЅРЅРѕР№ СЃС†РµРЅС‹ Haitan вЂ” СЃР»РµРґСѓСЋС‰РёР№ С€Р°Рі (Unity СЃРµР№С‡Р°СЃ Р·Р°РЅСЏС‚ Baseline LoginUI Play; РјРµРЅСЋ `LunexUfa/Haitan/Open Map Scene` + `Add Prototype Bootstrap`).
+
+## Client compile fix (перед Play Prototype)
+
+Отключены Darklord-скрипты с внешними зависимостями: `CameraFollow` / `CameraHeight` / `DeemoRadialBlur` (прототип использует `FollowCamera`).
+Докопированы T4M: `T4MLodObjSC`, `T4MBillBObjSC`, `T4MPartSC`, `T4MPlantObjSC`.
+`SceneDetailObject` больше не ссылается на `Titan.CoreEntry` (`Camera.main`).
+После открытия Client дождаться зелёной компиляции > меню **LunexUfa > Haitan > Play Prototype Now**.
