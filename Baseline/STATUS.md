@@ -67,6 +67,13 @@ Admin UI http://127.0.0.1:8090 вЂ” 200
 `SceneDetailObject` больше не ссылается на `Titan.CoreEntry` (`Camera.main`).
 После открытия Client дождаться зелёной компиляции > меню **LunexUfa > Haitan > Play Prototype Now**.
 
+## Client visuals pack (in progress в†’ ready to re-Play)
+
+- РЎРєРѕРїРёСЂРѕРІР°РЅС‹ `T4M/Shaders`, `Resources/Shaders`, С‚РµРєСЃС‚СѓСЂС‹ `AssetsRaw/Scene/texture` Рё `T4MOBJ/Terrains/Texture`.
+- РњРѕРґРµР»Рё: `monster_111`, `NPC_034` (Tias), `cs_caijiwu_wuqi` (СЃР±РѕСЂ), `zhanshi/L_ZS_01` (РіРµСЂРѕР№).
+- `HaitanBootstrap` РіСЂСѓР·РёС‚ СЌС‚Рё prefab РёР· Resources; РєР°РїСЃСѓР»С‹ вЂ” С‚РѕР»СЊРєРѕ fallback. РСЃРїСЂР°РІР»РµРЅ CS0165 (`dist`).
+- РџРѕСЃР»Рµ СЂРµРёРјРїРѕСЂС‚Р° Unity: Stop Play в†’ СЃРЅРѕРІР° **LunexUfa в†’ Haitan в†’ Play Prototype Now**. РљР°СЂС‚Р° РЅРµ РґРѕР»Р¶РЅР° Р±С‹С‚СЊ СЃРїР»РѕС€РЅС‹Рј magenta, РµСЃР»Рё С€РµР№РґРµСЂС‹ РїРѕРґС…РІР°С‚РёР»РёСЃСЊ.
+
 ## Client Play Prototype (owner, 2026-11-26)
 
 - Меню LunexUfa появилось после фикса Path.Combine в TransferHaitan.
