@@ -9,3 +9,8 @@ Observed: Game view shows login art + Russian UI "Версия Проверка"
 Play toolbar active. CoreEntry/MapMgr.EnterLoginScene/LuaInit ran; GameDBMgr XML load finished.
 Server list URL in Common.lua: http://127.0.0.1/ServerList.xml
 APK build skipped per owner request; verification via Editor Play instead.
+
+Follow-up from Play screenshot review:
+- Start Game button visible (開始遊戲).
+- Console (non-blocking): missing doc config id:110300201 tb:t_doc_map.
+- Play left running; Unity not closed.
