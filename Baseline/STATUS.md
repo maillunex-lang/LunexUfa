@@ -66,3 +66,10 @@ Admin UI http://127.0.0.1:8090 вЂ” 200
 Докопированы T4M: `T4MLodObjSC`, `T4MBillBObjSC`, `T4MPartSC`, `T4MPlantObjSC`.
 `SceneDetailObject` больше не ссылается на `Titan.CoreEntry` (`Camera.main`).
 После открытия Client дождаться зелёной компиляции > меню **LunexUfa > Haitan > Play Prototype Now**.
+
+## Client Play Prototype (owner, 2026-11-26)
+
+- Меню LunexUfa появилось после фикса Path.Combine в TransferHaitan.
+- Play Prototype Now: сцена cs_yw_haitan01, HUD `online quest=1001701`, HP 100/100, магазин version=4.
+- Hierarchy: Hero, NPC_Tias_201001001, Gather_180, Enemy_* — bootstrap работает, сервер отвечает.
+- Game view розовый — типичные missing shaders на перенесённых материалах; для прототипа не блокер (капсулы/HUD видны).
