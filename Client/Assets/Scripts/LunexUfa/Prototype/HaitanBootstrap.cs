@@ -134,13 +134,28 @@ namespace LunexUfa.Prototype
                 return;
             }
 
-            hero = CreateMarker("Hero", new Color(0.2f, 0.7f, 1f), _spawns.heroBirth, 1.6f);
-            tias = CreateMarker("NPC_Tias_201001001", new Color(0.2f, 1f, 0.4f), _spawns.npc, 1.8f);
-            // Editable in scene: keep as regular transform the designer can move.
+            // Real Darklord Resources prefabs when present; colored capsules as fallback.
+            hero = CreateActor(
+                "Hero",
+                "Animation/player/zhanshi/L_ZS_01/L_ZS_01_pre",
+                new Color(0.2f, 0.7f, 1f),
+                _spawns.heroBirth,
+                1.0f);
+            tias = CreateActor(
+                "NPC_Tias_201001001",
+                "Animation/npc/NPC_034/NPC_034_pre",
+                new Color(0.2f, 1f, 0.4f),
+                _spawns.npc,
+                1.0f);
             tias.gameObject.AddComponent<NpcEditableMarker>().npcId = _spawns.npc.id;
 
             if (_spawns.gather != null)
-                gather = CreateMarker("Gather_180", new Color(1f, 0.85f, 0.2f), _spawns.gather, 1.2f);
+                gather = CreateActor(
+                    "Gather_180",
+                    "Animation/collection/cs_caijiwu_wuqi",
+                    new Color(1f, 0.85f, 0.2f),
+                    _spawns.gather,
+                    1.0f);
 
             monsters.Clear();
             if (_spawns.monsterSpawns != null)
@@ -148,7 +163,12 @@ namespace LunexUfa.Prototype
                 for (int i = 0; i < _spawns.monsterSpawns.Length; i++)
                 {
                     MonsterSpawn m = _spawns.monsterSpawns[i];
-                    Transform t = CreateMarker("Enemy_" + m.spawnIndex + "_" + m.id, new Color(1f, 0.1f, 0.1f), m, 2.0f);
+                    Transform t = CreateActor(
+                        "Enemy_" + m.spawnIndex + "_" + m.id,
+                        "Animation/monster/monster_111/monster_111_pre",
+                        new Color(1f, 0.1f, 0.1f),
+                        m,
+                        1.0f);
                     EnemyMarker em = t.gameObject.AddComponent<EnemyMarker>();
                     em.monsterId = m.id;
                     em.hp = 10;
@@ -177,25 +197,48 @@ namespace LunexUfa.Prototype
                 followCamera.height = _spawns.camera.height;
                 followCamera.rotationAngle = _spawns.camera.rotationAngle;
             }
+            FixBrokenMaterials();
             _status = "actors_ready";
         }
 
-        Transform CreateMarker(string name, Color color, SpawnVec spawn, float scale)
+        Transform CreateActor(string name, string resourcesPath, Color fallbackColor, SpawnVec spawn, float scale)
         {
-            GameObject go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            GameObject go = null;
+            if (!string.IsNullOrEmpty(resourcesPath))
+            {
+                GameObject prefab = Resources.Load<GameObject>(resourcesPath);
+                if (prefab != null)
+                    go = UnityEngine.Object.Instantiate(prefab);
+            }
+            if (go == null)
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                Renderer r = go.GetComponent<Renderer>();
+                if (r != null)
+                {
+                    Shader sh = Shader.Find("Legacy Shaders/Diffuse");
+                    if (sh == null)
+                        sh = Shader.Find("Standard");
+                    Material mat = new Material(sh);
+                    mat.color = fallbackColor;
+                    r.sharedMaterial = mat;
+                }
+            }
             go.name = name;
             go.transform.position = new Vector3(spawn.x, spawn.y, spawn.z);
             go.transform.rotation = Quaternion.Euler(0f, spawn.direction * Mathf.Rad2Deg, 0f);
-            go.transform.localScale = Vector3.one * scale;
-            Renderer r = go.GetComponent<Renderer>();
-            if (r != null)
+            if (scale != 1f)
+                go.transform.localScale = go.transform.localScale * scale;
+            // Strip heavy Darklord behaviours that need Titan/DOTween — keep mesh/animators.
+            MonoBehaviour[] behaviours = go.GetComponentsInChildren<MonoBehaviour>(true);
+            for (int i = 0; i < behaviours.Length; i++)
             {
-                Shader sh = Shader.Find("Legacy Shaders/Diffuse");
-                if (sh == null)
-                    sh = Shader.Find("Standard");
-                Material mat = new Material(sh);
-                mat.color = color;
-                r.sharedMaterial = mat;
+                MonoBehaviour b = behaviours[i];
+                if (b == null)
+                    continue;
+                string tn = b.GetType().FullName;
+                if (tn != null && (tn.StartsWith("Titan.") || tn.IndexOf("DOTween") >= 0 || tn.IndexOf("HT1") >= 0))
+                    UnityEngine.Object.Destroy(b);
             }
             return go.transform;
         }
@@ -287,7 +330,7 @@ namespace LunexUfa.Prototype
                     + "  прогресс " + net.player.questProgress + "/" + net.player.questGoalCount);
                 GUILayout.Label("Магазин version=" + net.shopVersion);
             }
-            float dist;
+            float dist = 0f;
             EnemyMarker n = (hero != null) ? FindNearestEnemy(out dist) : null;
             if (n != null)
                 GUILayout.Label("Ближайший враг: " + dist.ToString("0.0") + " м — жми F (телепорт) потом K");
