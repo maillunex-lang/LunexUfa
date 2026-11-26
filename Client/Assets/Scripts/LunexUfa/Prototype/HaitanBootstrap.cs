@@ -229,16 +229,13 @@ namespace LunexUfa.Prototype
             go.transform.rotation = Quaternion.Euler(0f, spawn.direction * Mathf.Rad2Deg, 0f);
             if (scale != 1f)
                 go.transform.localScale = go.transform.localScale * scale;
-            // Strip heavy Darklord behaviours that need Titan/DOTween — keep mesh/animators.
+            // Prefabs reference Titan/XLua scripts we deliberately exclude from Client compile.
+            // Keep mesh/Animator only — strip every MonoBehaviour on instantiate.
             MonoBehaviour[] behaviours = go.GetComponentsInChildren<MonoBehaviour>(true);
             for (int i = 0; i < behaviours.Length; i++)
             {
-                MonoBehaviour b = behaviours[i];
-                if (b == null)
-                    continue;
-                string tn = b.GetType().FullName;
-                if (tn != null && (tn.StartsWith("Titan.") || tn.IndexOf("DOTween") >= 0 || tn.IndexOf("HT1") >= 0))
-                    UnityEngine.Object.Destroy(b);
+                if (behaviours[i] != null)
+                    UnityEngine.Object.Destroy(behaviours[i]);
             }
             return go.transform;
         }
