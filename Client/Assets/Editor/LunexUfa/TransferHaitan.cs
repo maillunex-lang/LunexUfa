@@ -18,7 +18,8 @@ namespace LunexUfa.Client
         {
             string clientRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
             string lunexRoot = Path.GetFullPath(Path.Combine(clientRoot, ".."));
-            string baselineAssets = Path.Combine(lunexRoot, "Baseline", "Darklord-Android", "Assets");
+            // Unity 2017 / .NET 3.5: Path.Combine accepts only 2 args.
+            string baselineAssets = Path.Combine(Path.Combine(Path.Combine(lunexRoot, "Baseline"), "Darklord-Android"), "Assets");
             string darklordAssets = @"C:\SOURCE\Darklord-Final\Client\Assets";
             string sourceAssets = Directory.Exists(baselineAssets) ? baselineAssets : darklordAssets;
             string sourceProject = Path.GetDirectoryName(sourceAssets);
@@ -28,12 +29,12 @@ namespace LunexUfa.Client
             // Ensure scene exists in this project by copying dependency closure from source via AssetDatabase after linking.
             // Strategy: open source path list from a temporary copy of the scene tree already present,
             // or import by copying files with meta then Refresh.
-            string srcScene = Path.Combine(sourceAssets, "Scene", "allMap", "cs_yw_haitan01", "cs_yw_haitan01.unity");
+            string srcScene = Path.Combine(Path.Combine(Path.Combine(Path.Combine(sourceAssets, "Scene"), "allMap"), "cs_yw_haitan01"), "cs_yw_haitan01.unity");
             if (!File.Exists(srcScene))
                 throw new FileNotFoundException("Haitan scene not found", srcScene);
 
-            CopyWithMeta(Path.Combine(sourceAssets, "Scene", "allMap", "cs_yw_haitan01"),
-                Path.Combine(Application.dataPath, "Scene", "allMap", "cs_yw_haitan01"));
+            CopyWithMeta(Path.Combine(Path.Combine(Path.Combine(sourceAssets, "Scene"), "allMap"), "cs_yw_haitan01"),
+                Path.Combine(Path.Combine(Path.Combine(Application.dataPath, "Scene"), "allMap"), "cs_yw_haitan01"));
 
             AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
 
@@ -113,7 +114,7 @@ namespace LunexUfa.Client
                 }
             }
 
-            string reportPath = Path.Combine(lunexRoot, "Client", "Haitan-Transfer-Report.txt");
+            string reportPath = Path.Combine(Path.Combine(lunexRoot, "Client"), "Haitan-Transfer-Report.txt");
             report.Add("OPENED scene roots=" + scene.rootCount + " missingScripts=" + missingScripts);
             report.Add("MISSING_COUNT " + missing.Count);
             File.WriteAllLines(reportPath, report.ToArray());
