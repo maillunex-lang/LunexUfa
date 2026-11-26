@@ -87,8 +87,43 @@ namespace LunexUfa.Prototype
                 spawnsJson = Resources.Load<TextAsset>("HaitanPrototypeSpawns");
             if (spawnsJson != null)
                 _spawns = JsonUtility.FromJson<SpawnsDoc>(spawnsJson.text);
+            FixBrokenMaterials();
             BuildSceneActors();
             StartCoroutine(BootNet());
+        }
+
+        /// <summary>
+        /// Magenta/pink in Scene/Game = missing Darklord shaders. Force a visible fallback.
+        /// </summary>
+        static void FixBrokenMaterials()
+        {
+            Shader fallback = Shader.Find("Legacy Shaders/Diffuse");
+            if (fallback == null)
+                fallback = Shader.Find("Standard");
+            if (fallback == null)
+                return;
+            Material ground = new Material(fallback);
+            ground.color = new Color(0.35f, 0.45f, 0.28f);
+            Renderer[] renderers = UnityEngine.Object.FindObjectsOfType<Renderer>();
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                Renderer r = renderers[i];
+                if (r == null)
+                    continue;
+                Material mat = r.sharedMaterial;
+                bool broken = mat == null || mat.shader == null
+                    || mat.shader.name == "Hidden/InternalErrorShader"
+                    || mat.shader.name.IndexOf("InternalError") >= 0;
+                if (broken)
+                    r.sharedMaterial = ground;
+            }
+            // Clear pink clear-color if no skybox
+            Camera cam = Camera.main;
+            if (cam != null)
+            {
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = new Color(0.45f, 0.65f, 0.9f);
+            }
         }
 
         void BuildSceneActors()
@@ -99,13 +134,13 @@ namespace LunexUfa.Prototype
                 return;
             }
 
-            hero = CreateMarker("Hero", new Color(0.2f, 0.7f, 1f), _spawns.heroBirth, 1.0f);
-            tias = CreateMarker("NPC_Tias_201001001", new Color(0.2f, 1f, 0.4f), _spawns.npc, 1.2f);
+            hero = CreateMarker("Hero", new Color(0.2f, 0.7f, 1f), _spawns.heroBirth, 1.6f);
+            tias = CreateMarker("NPC_Tias_201001001", new Color(0.2f, 1f, 0.4f), _spawns.npc, 1.8f);
             // Editable in scene: keep as regular transform the designer can move.
             tias.gameObject.AddComponent<NpcEditableMarker>().npcId = _spawns.npc.id;
 
             if (_spawns.gather != null)
-                gather = CreateMarker("Gather_180", new Color(1f, 0.85f, 0.2f), _spawns.gather, 0.7f);
+                gather = CreateMarker("Gather_180", new Color(1f, 0.85f, 0.2f), _spawns.gather, 1.2f);
 
             monsters.Clear();
             if (_spawns.monsterSpawns != null)
@@ -113,11 +148,11 @@ namespace LunexUfa.Prototype
                 for (int i = 0; i < _spawns.monsterSpawns.Length; i++)
                 {
                     MonsterSpawn m = _spawns.monsterSpawns[i];
-                    Transform t = CreateMarker("Enemy_" + m.spawnIndex + "_" + m.id, new Color(1f, 0.25f, 0.25f), m, 0.9f);
+                    Transform t = CreateMarker("Enemy_" + m.spawnIndex + "_" + m.id, new Color(1f, 0.1f, 0.1f), m, 2.0f);
                     EnemyMarker em = t.gameObject.AddComponent<EnemyMarker>();
                     em.monsterId = m.id;
-                    em.hp = 30;
-                    em.maxHp = 30;
+                    em.hp = 10;
+                    em.maxHp = 10;
                     monsters.Add(t);
                 }
             }
@@ -154,8 +189,36 @@ namespace LunexUfa.Prototype
             go.transform.localScale = Vector3.one * scale;
             Renderer r = go.GetComponent<Renderer>();
             if (r != null)
-                r.sharedMaterial = new Material(Shader.Find("Standard")) { color = color };
+            {
+                Shader sh = Shader.Find("Legacy Shaders/Diffuse");
+                if (sh == null)
+                    sh = Shader.Find("Standard");
+                Material mat = new Material(sh);
+                mat.color = color;
+                r.sharedMaterial = mat;
+            }
             return go.transform;
+        }
+
+        EnemyMarker FindNearestEnemy(out float dist)
+        {
+            EnemyMarker nearest = null;
+            dist = 9999f;
+            for (int i = 0; i < monsters.Count; i++)
+            {
+                if (monsters[i] == null || !monsters[i].gameObject.activeInHierarchy)
+                    continue;
+                EnemyMarker em = monsters[i].GetComponent<EnemyMarker>();
+                if (em == null || em.hp <= 0)
+                    continue;
+                float d = Vector3.Distance(hero.position, monsters[i].position);
+                if (d < dist)
+                {
+                    dist = d;
+                    nearest = em;
+                }
+            }
+            return nearest;
         }
 
         IEnumerator BootNet()
@@ -183,42 +246,36 @@ namespace LunexUfa.Prototype
                 hero.position += delta;
             }
 
-            // Keys for quest proofing: T talk, G gather, K kill nearest
+            // F = teleport onto nearest enemy (no map needed on pink/broken view)
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                float d;
+                EnemyMarker near = FindNearestEnemy(out d);
+                if (near != null)
+                    hero.position = near.transform.position + Vector3.up * 0.5f;
+            }
+
+            // Keys for quest proofing: T talk, G gather, K kill nearest (any distance)
             if (Input.GetKeyDown(KeyCode.T))
                 StartCoroutine(net.SendQuestEvent("talk_npc", 201001001, 0, 0, 0));
             if (Input.GetKeyDown(KeyCode.G))
                 StartCoroutine(net.SendQuestEvent("gather", 0, 180, 0, 0));
             if (Input.GetKeyDown(KeyCode.K))
             {
-                EnemyMarker nearest = null;
-                float best = 999f;
-                for (int i = 0; i < monsters.Count; i++)
+                float best;
+                EnemyMarker nearest = FindNearestEnemy(out best);
+                if (nearest != null)
                 {
-                    if (monsters[i] == null)
-                        continue;
-                    EnemyMarker em = monsters[i].GetComponent<EnemyMarker>();
-                    if (em == null || em.hp <= 0)
-                        continue;
-                    float d = Vector3.Distance(hero.position, monsters[i].position);
-                    if (d < best)
-                    {
-                        best = d;
-                        nearest = em;
-                    }
-                }
-                if (nearest != null && best < 8f)
-                {
-                    nearest.hp = Mathf.Max(0, nearest.hp - 10);
-                    StartCoroutine(net.SendQuestEvent("kill", 0, 0, nearest.monsterId, nearest.hp));
-                    if (nearest.hp <= 0)
-                        nearest.gameObject.SetActive(false);
+                    nearest.hp = 0;
+                    StartCoroutine(net.SendQuestEvent("kill", 0, 0, nearest.monsterId, 0));
+                    nearest.gameObject.SetActive(false);
                 }
             }
         }
 
         void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(12, 12, 420, 160));
+            GUILayout.BeginArea(new Rect(12, 12, 480, 200));
             GUILayout.Box("LunexUfa Haitan prototype");
             GUILayout.Label(_status);
             if (net != null && net.player != null)
@@ -230,7 +287,13 @@ namespace LunexUfa.Prototype
                     + "  прогресс " + net.player.questProgress + "/" + net.player.questGoalCount);
                 GUILayout.Label("Магазин version=" + net.shopVersion);
             }
-            GUILayout.Label("WASD ход | T разговор с Tias | G сбор 180 | K удар");
+            float dist;
+            EnemyMarker n = (hero != null) ? FindNearestEnemy(out dist) : null;
+            if (n != null)
+                GUILayout.Label("Ближайший враг: " + dist.ToString("0.0") + " м — жми F (телепорт) потом K");
+            else
+                GUILayout.Label("Живых врагов нет");
+            GUILayout.Label("T разговор | G сбор | F к врагу | K убить | WASD ход");
             GUILayout.EndArea();
         }
     }
