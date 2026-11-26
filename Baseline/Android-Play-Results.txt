@@ -1,0 +1,16 @@
+﻿ANDROID Play Mode verification (2026-11-26T21:19:34.7835139+05:00)
+Project: Baseline/Darklord-Android
+Target: Android
+Scene: LoginUI.unity
+Unity: 2017.4.30f1 Personal PID 9376
+Evidence: artifacts/unity_loginui_play_now.png
+Log: Baseline/Unity-Android-Play.log
+Observed: Game view shows login art + Russian UI "Версия Проверка", fields Логин/Пароль (default / ******).
+Play toolbar active. CoreEntry/MapMgr.EnterLoginScene/LuaInit ran; GameDBMgr XML load finished.
+Server list URL in Common.lua: http://127.0.0.1/ServerList.xml
+APK build skipped per owner request; verification via Editor Play instead.
+
+Follow-up from Play screenshot review:
+- Start Game button visible (開始遊戲).
+- Console (non-blocking): missing doc config id:110300201 tb:t_doc_map.
+- Play left running; Unity not closed.

@@ -1,0 +1,46 @@
+{
+  "source": "Server-Windows/data/config/QuestConfig.lua + Server-Linux quest loaders",
+  "notes": [
+    "kind 1 GOSSIP auto-finishes on accept; submit via finishNpcId",
+    "kind 4 GATHER goal id,num — map collection config id",
+    "kind 2 KILL_MONSTER goal id,num — monster template id"
+  ],
+  "quests": [
+    {
+      "id": 1001701,
+      "kind": 1,
+      "kindName": "GOSSIP",
+      "nextQuestId": 1001702,
+      "finishNpcId": 201001001,
+      "goal": null,
+      "legacyGoal": "",
+      "experience": 1040,
+      "money": 1000,
+      "autoAccept": true
+    },
+    {
+      "id": 1001702,
+      "kind": 4,
+      "kindName": "GATHER",
+      "nextQuestId": 1001703,
+      "finishNpcId": 0,
+      "goal": { "id": 180, "count": 1 },
+      "legacyGoal": "180,1",
+      "experience": 550,
+      "money": 1050,
+      "autoAccept": true
+    },
+    {
+      "id": 1001703,
+      "kind": 2,
+      "kindName": "KILL_MONSTER",
+      "nextQuestId": 1001704,
+      "finishNpcId": 0,
+      "goal": { "id": 100101001, "count": 3 },
+      "legacyGoal": "100101001,3",
+      "experience": 550,
+      "money": 1050,
+      "autoAccept": true
+    }
+  ]
+}

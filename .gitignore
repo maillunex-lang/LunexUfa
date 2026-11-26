@@ -14,3 +14,16 @@
 *.aab
 .env
 *.keystore
+
+# Large local toolchains / full Unity baseline clone (keep docs + result txt tracked)
+Baseline/Darklord-Android/
+Baseline/Unity-*.log
+Baseline/guid-index.tsv
+Toolchain/
+Server/data/
+
+Admin/*.log
+Server/*.log
+Server/*.out.log
+Server/*.err.log
+

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LunexUfa — админка</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <p class="brand">LunexUfa</p>
+    <h1>Админка тестовых миров</h1>
+    <p class="lead">Локальный прототип. API: <code id="apiBase">http://127.0.0.1:8080</code></p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Миры</h2>
+      <div class="row">
+        <input id="worldName" type="text" placeholder="Имя второго мира" value="Хайтен-2" />
+        <button id="btnCreateWorld" type="button">Открыть второй мир</button>
+        <button id="btnRefreshWorlds" type="button" class="ghost">Обновить</button>
+      </div>
+      <ul id="worldList"></ul>
+    </section>
+
+    <section>
+      <h2>Магазин</h2>
+      <p>Изменение цены видно клиенту через <code>GET /shop/items</code> (поле version).</p>
+      <div class="row">
+        <select id="shopItem"></select>
+        <input id="shopPrice" type="number" min="1" step="1" />
+        <button id="btnSavePrice" type="button">Сохранить цену</button>
+      </div>
+      <pre id="shopOut"></pre>
+    </section>
+
+    <section>
+      <h2>Боты</h2>
+      <div class="row">
+        <select id="botWorld"></select>
+        <input id="botLine" type="text" value="Я тестовый бот. Видите движение и чат?" />
+        <button id="btnStartBot" type="button">Запустить бота</button>
+        <button id="btnStopBots" type="button" class="ghost">Отключить всех в мире</button>
+      </div>
+      <pre id="botOut"></pre>
+    </section>
+
+    <section>
+      <h2>Чат мира</h2>
+      <div class="row">
+        <select id="chatWorld"></select>
+        <button id="btnRefreshChat" type="button" class="ghost">Обновить чат</button>
+      </div>
+      <pre id="chatOut"></pre>
+    </section>
+
+    <section>
+      <h2>Журнал</h2>
+      <pre id="log"></pre>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

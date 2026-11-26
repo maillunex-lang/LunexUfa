@@ -1,0 +1,283 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using XLua;
+
+namespace Titan
+{
+    public class RunState : IActorState
+    {
+        void Start()
+        {
+
+        }
+        
+        public override void OnEnter(CActorObject actorBase)
+        {
+            if(null == actorBase)
+            {
+                return;
+            }
+            if (actorBase.mActorType == ActorType.AT_TRAP || actorBase.mActorType == ActorType.AT_SCENE_BUFF)
+            {
+                return;
+            }
+            CMonsterObject monsterObj = this.gameObject.GetComponent<CMonsterObject>();
+          
+
+            m_state = ACTOR_STATE.AS_RUN;
+
+            m_actor = actorBase;
+            // m_actor.PlayAction(m_actor.modelInfo.san_walk);
+
+            if (m_actor.curCastSkillID > 0)
+            {
+                LuaTable skillDesc = ConfigDataMgr.Instance.Skill.GetSkillConfig(m_actor.curCastSkillID);
+                if (skillDesc != null)
+                {
+                    if (skillDesc.Get<int>("subtype") != (int)SkillType.SKILL_XUANFANZHAN)
+                    {
+                        if (m_actor != null )
+                            m_actor.PlayAction("run");
+                    }
+                }
+
+            }
+            else
+            {
+                m_actor.PlayAction("run");      
+               
+            }
+
+            //设置跑步速度
+            if (m_actor.mBaseAttr != null)
+            {
+                if (m_actor.mBaseAttr.Speed > 0)
+                {
+                    m_actor.SetSpeed(m_actor.mBaseAttr.Speed);
+                }
+            }
+            else
+            {
+                m_actor.SetSpeed(1.0f);
+            }
+
+            m_actor.LoadFootPrint();
+        }
+        
+        protected float lastUpdate = 0;
+        public virtual void Update()
+        {
+            // 减少处理 频率 lmjedit
+            if (Time.time - lastUpdate < 0.1f)
+            {
+                return;
+            }
+            lastUpdate = Time.time;
+        }
+
+        public override void FrameUpdate()
+        {
+            if (m_actor != null)
+            {
+                m_actor.LoadFootPrint();
+            }
+        }
+
+        public override bool CanChangeState(StateParameter stateParm)
+        {
+            if (m_actor == null)
+            {
+                return false;
+            }
+
+            if (stateParm.state == ACTOR_STATE.AS_RUN)
+            {
+                return true;
+            }
+
+
+            if (stateParm.state == ACTOR_STATE.AS_BEHIT && m_actor.IsMainPlayer())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        public override void OnExit(StateParameter stateParm)
+        {
+
+            //退出跑步
+            if (stateParm.state == ACTOR_STATE.AS_RUN || stateParm.state == ACTOR_STATE.AS_RUN_ATTACK)
+            {
+                //AS_RUN状态，就不stopmove了   
+                return;
+            }
+
+            if (null != m_actor)
+            {
+                m_actor.StopMove(false);
+                m_actor.OnExitState(ACTOR_STATE.AS_RUN);
+            }
+
+            StartMove_test_ex(0, 0, null);
+        }
+
+
+        //计算时间
+        private bool StartMove_test_ex(float time, float distance, CActorObject attacker)
+        {
+            float mDuration = time;
+            Vector3 mStartPos = Vector3.zero;
+            Vector3 dir;
+
+            if (null != attacker)
+            {
+                dir = (attacker.transform.position - mStartPos).normalized;
+            }
+            else
+            {
+                dir = Vector3.forward;
+            }
+
+            if (attacker == null)
+                return false;
+
+
+            int TempValue = 0;
+            int RandomValue = 0;
+
+            int num = 0;
+            if (TempValue != 0 || RandomValue != 0)
+            {
+                bool isCount = TempValue % 2 == 0;
+                num = TempValue * (isCount ? -1 : 1);
+                num -= RandomValue;
+            }
+
+            AnimationCurveData m_animationCurveData = null;
+            string strClipName = "";
+            CurveData curveData = m_animationCurveData.GetCurveData(strClipName);
+            if (curveData == null)
+            {
+                LogMgr.LogError("can't find {0} curve data", strClipName);
+                return false;
+            }
+
+            List<float> listValueX = new List<float>();
+            List<float> listValueY = new List<float>();
+            List<float> listValueZ = new List<float>();
+            List<float> listTime = new List<float>();
+
+            List<Keyframe> listKeyFrameX = new List<Keyframe>();
+            List<Keyframe> listKeyFrameY = new List<Keyframe>();
+            List<Keyframe> listKeyFrameZ = new List<Keyframe>();
+
+
+            Vector3 pos1 = new Vector3(listValueX[0], listValueY[0], listValueZ[0]);
+            Vector3 pos2 = new Vector3(listValueX[listValueX.Count - 1],
+                listValueY[listValueX.Count - 1], listValueZ[listValueX.Count - 1]);
+
+            //缩放系数        
+            float distanceA = Vector3.Distance(pos1, pos2);
+            float distanceB = Vector3.Distance(pos1, pos2);
+
+
+            //是否有卡帧系数
+            if (curveData.keyIndex > 0 & curveData.keyIndex < listValueX.Count - 1)
+            {
+                //卡帧前面的位移
+                Vector3 pos3 = new Vector3(listValueX[curveData.keyIndex], listValueY[0], listValueZ[curveData.keyIndex]);
+                float distanceC = Vector3.Distance(pos1, pos3);
+
+                //LogMgr.UnityLog("distanceC=" + distanceC);
+
+                if (distanceA > distanceC)
+                {
+                    distanceA -= distanceC;
+                    distanceB -= distanceC;
+
+                }
+            }
+
+            float fscale = distanceA / distanceB;
+            if (Mathf.Approximately(distanceB, 0) || fscale <= 0)
+            {
+                fscale = 1f;
+            }
+
+            //LogMgr.UnityLog("distanceA=" + distanceA + ", distanceB=" + distanceB + ", fscale=" + fscale);
+
+            //使用点的旋转            
+            List<Vector3> listCurvePos = new List<Vector3>();
+            for (int i = 0; i < 1; ++i)
+            {
+                Vector3 pos = new Vector3(listValueX[i], listValueY[i], listValueZ[i]);
+
+                //缩放
+                if (curveData.keyIndex > 0 && curveData.keyIndex < listValueX.Count - 1)
+                {
+                    //后面的缩放
+                    if (i > curveData.keyIndex)
+                    {
+                        pos.Scale(new Vector3(fscale, 1, fscale));
+                        pos += new Vector3(listValueX[curveData.keyIndex], pos.y, listValueZ[curveData.keyIndex]);
+                    }
+                }
+                else
+                {
+                    pos.Scale(new Vector3(fscale, 1f, fscale));
+                }
+
+                //自身旋转
+
+                listCurvePos.Add(pos);
+            }
+
+            //计算玩家方向
+            Vector3 maxPos = mStartPos - dir * distance;
+            Vector3 mTargetPos = CoreEntry.gBaseTool.GetLineReachablePos(mStartPos, maxPos);
+            Vector3 mDeltaPos = (mTargetPos - mStartPos) / mDuration;
+            float mStartTime = Time.time;
+
+            if (mStartTime > 0)
+                return false;
+
+            EndMove_test_ex(0, 0, null);
+
+            return true;
+        }
+
+        private bool EndMove_test_ex(float time, float distance, CActorObject attacker)
+        {
+            //临时计算时间
+            float mDuration1 = time;
+            Vector3 mStartPos1 = Vector3.zero;
+            Vector3 dir;
+
+            if (null != attacker)
+            {
+                dir = (attacker.transform.position - mStartPos1).normalized;
+            }
+            else
+            {
+                dir = Vector3.forward;
+            }
+
+            //计算玩家方向
+            Vector3 maxPos = mStartPos1 - dir * distance;
+            Vector3 mTargetPos = CoreEntry.gBaseTool.GetLineReachablePos(mStartPos1, maxPos);
+            Vector3 mDeltaPos = (mTargetPos - mStartPos1) / mDuration1;
+            float mStartTime = Time.time;
+
+            if (mStartTime > 0)
+                return false;
+
+            return true;
+        }
+   
+}
+}

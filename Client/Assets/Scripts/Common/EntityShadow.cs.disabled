@@ -1,0 +1,159 @@
+using UnityEngine;
+using System.Collections;
+using Titan;
+
+public class EntityShadow : MonoBehaviour 
+{
+	private GameObject blob;
+    private Transform blobT;
+    public GameObject shadowPro;
+    private int shadowType = 1;
+    private Transform m_transform = null;	
+    
+    private Vector3 m_cachePos = Vector3.zero;
+    private CEntity m_entity = null;
+    public void Init(CEntity entity, int type)
+    {
+        m_entity = entity;
+        //shadowType = type;
+        shadowType = SettingMgr.Instance.PicSetting - 1;
+    }
+    
+	void Start () 
+	{       
+        m_transform = this.transform; 
+	}
+   
+    public void HideShadow()
+	{
+        HideNorShadow();
+        HideProShadow();
+	}
+	public void ShowShadow()
+	{
+        if (shadowType == 2)
+        {
+            if (m_entity is CPlayerObject)
+            {
+                ShowProShadow();
+            }
+            else
+            {
+                ShowNorShadow();
+            }
+        }
+        else if(shadowType == 1)
+        {
+            ShowNorShadow();
+        }
+    }
+
+    public void ChangeShow(int type)
+    {
+        int preType = shadowType;
+        shadowType = SettingMgr.Instance.PicSetting - 1;
+        //shadowType = type;
+        if(shadowType != preType)
+        {
+            HideShadow();
+        }
+
+        ShowShadow();
+    }
+
+    private void ShowNorShadow()
+    {
+        if(null != blob)
+        {
+            return;
+        }
+
+        blob = CoreEntry.gGameObjPoolMgr.InstantiateEffect("Effect/common/fx_shadow");
+        if (blob == null)
+        {
+            LogMgr.LogError("找不到 prefab: " + "Effect/common/fx_shadow");
+            return;
+        }
+
+        blobT = blob.transform;
+        blobT.parent = transform;
+        blobT.localPosition = Vector3.zero;
+        blobT.localScale = new Vector3(3.0f, 3.0f, 3.0f);
+        blobT.localEulerAngles = new Vector3(90f, 0f, 0f);
+    }
+
+    private void HideNorShadow()
+    {
+        if(null == blob)
+        {
+            return;
+        }
+
+        CoreEntry.gGameObjPoolMgr.Destroy(blob);
+        blob = null;
+    }
+
+    private void ShowProShadow()
+    {
+        if(null != shadowPro)
+        {
+            return;
+        }
+        
+        shadowPro = CoreEntry.gGameObjPoolMgr.InstantiateEffect("Effect/common/fx_shadow_pro");
+        if (shadowPro == null)
+        {
+            LogMgr.LogError("找不到 prefab: " + "Effect/common/fx_shadow_pro");
+            return;
+        }
+
+        Transform t = shadowPro.transform;
+        t.localScale = Vector3.one;
+        t.localPosition = Vector3.zero;
+        t.localRotation = Quaternion.identity;
+
+        CameraLock cl = shadowPro.GetComponent<CameraLock>();
+        if (cl != null)
+        {
+            cl.m_TargetObj = m_entity.gameObject;
+        }
+    }
+
+    private void HideProShadow()
+    {
+        if(null == shadowPro)
+        {
+            return;
+        }
+        
+        CoreEntry.gGameObjPoolMgr.Destroy(shadowPro);
+        shadowPro = null;
+    }
+
+
+    private void HideProShadow_ex_test()
+    {
+        if (null == shadowPro)
+        {
+            return;
+        }
+
+        CoreEntry.gGameObjPoolMgr.Destroy(shadowPro);
+        shadowPro = null;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}

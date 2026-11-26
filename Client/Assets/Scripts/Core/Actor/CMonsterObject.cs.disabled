@@ -1,0 +1,617 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using XLua;
+
+namespace Titan
+{
+
+    //玩家组件
+    public class CMonsterObject : CActorObject
+    {
+        //private TouchMove m_touchMove = null;
+        private CapsuleCollider m_capCollider = null;
+        private BoxCollider m_boxCollider = null;
+        private Collider_Type m_colliderType = Collider_Type.CT_NONE;
+        
+        //protected SkillGiftsMgr m_skillGiftsMgr = null;
+        //private MonsterHeath m_heath = null;
+
+        protected MoveAnimation m_moveAni;
+
+        /// <summary>
+        /// 标记塔的重要序号，1位最重要的塔，然后2，再次是3
+        /// </summary>
+        public int IndexAsTower = 1;
+
+        public bool m_bNoUseBehit = false;
+
+        /// <summary>
+        /// 是不是被保护的重要对象
+        /// </summary>
+        public bool IsVip = false;
+
+        /// <summary>
+        /// vip被攻击的时候站立几秒
+        /// </summary>
+        public float StandTimeWhenBehitAsVip = 3;
+
+        /// <summary>
+        /// vip是否正在被攻击
+        /// </summary>
+        public bool IsUnderAttackAsVip = false;
+
+        /// <summary>
+        /// 是否是上下分部结构
+        /// </summary>
+        public bool m_IsUpperAndBasePart = false;
+
+        public float ProtectedOffset = 2f;
+
+        /// <summary>
+        /// 怪物是否为Boss。
+        /// </summary>
+        private bool mIsBoss;
+
+        /// <summary>
+        /// 获取怪物是否位Boss。
+        /// </summary>
+        public bool IsBoss
+        {
+            get { return mIsBoss; }
+        }
+
+        //protected Configs.monsterConfig m_monsterInfo = null;
+        //public Configs.monsterConfig MonsterInfo
+        //{
+        //    get { return m_monsterInfo; }
+        //}
+
+        /// <summary>
+        /// 怪物配置。
+        /// </summary>
+        protected LuaTable m_MonsterConfig;
+
+        /// <summary>
+        /// 获取怪物配置。
+        /// </summary>
+        public LuaTable MonsterConfig
+        {
+            get { return m_MonsterConfig; }
+        }
+
+        public Vector3 GetProtectedOffset()
+        {
+            return transform.forward * ProtectedOffset + transform.right * 1f;
+        }
+
+        public Collider_Type ColliderType
+        {
+            get { return m_colliderType; }
+        }
+
+        protected GameObject m_footEffect;
+
+        public override void Awake()
+        {
+            base.Awake();
+
+          //  m_transform = this.transform;
+            m_capCollider = this.gameObject.GetComponent<CapsuleCollider>();
+            m_boxCollider = this.gameObject.GetComponent<BoxCollider>();
+            if (m_capCollider != null)
+            {
+                m_colliderType = Collider_Type.CT_CAPSULE;
+            }
+            else if (m_boxCollider != null)
+            {
+                m_colliderType = Collider_Type.CT_BOX;
+            }
+
+
+            RegisterEvent();
+        }
+
+        //bool isBoss = false;
+        public override void Init(int resID, int configID, long entityID, string strEnterAction = "", bool isNpc = false)
+        {
+            m_RunState = this.gameObject.GetComponent<RunState>();
+            if (null == m_RunState)
+            {
+                m_RunState = this.gameObject.AddComponent<RunState>();
+            }
+            m_StandState = this.gameObject.GetComponent<StandState>();
+            if (null == m_StandState)
+            {
+                m_StandState = this.gameObject.AddComponent<StandState>();
+            }
+
+            m_DeathState = this.gameObject.GetComponent<DeathState>();
+            if (null == m_DeathState)
+            {
+                m_DeathState = this.gameObject.AddComponent<DeathState>();
+            }
+            m_AttackState = this.gameObject.GetComponent<AttackState>();
+            if (null == m_AttackState)
+            {
+                m_AttackState = this.gameObject.AddComponent<AttackState>();
+            }
+            m_BehitState = this.gameObject.GetComponent<BehitState>();
+            if (null == m_BehitState)
+            {
+                m_BehitState = this.gameObject.AddComponent<BehitState>();
+            }
+
+            m_DizzyState = this.gameObject.GetComponent<DizzyState>();
+            if (null == m_DizzyState)
+            {
+                m_DizzyState = this.gameObject.AddComponent<DizzyState>();
+            }
+            m_LimitState = this.gameObject.GetComponent<LimitState>();
+            if (null == m_LimitState)
+            {
+                m_LimitState = this.gameObject.AddComponent<LimitState>();
+            }
+
+            m_StoneState = this.gameObject.GetComponent<StoneState>();
+            if (null == m_StoneState)
+            {
+                m_StoneState = this.gameObject.AddComponent<StoneState>();
+            }
+            
+            base.Init(resID, configID, entityID, strEnterAction);
+            m_MonsterConfig = ConfigDataMgr.Instance.Actor.GetMonsterConfig(configID);
+            if (m_MonsterConfig == null) return;
+            //m_monsterInfo = CSVConfigManager.GetmonsterConfig(configID);
+            if (m_MonsterConfig.Get<int>("hpCount") > 0)
+            {
+                mActorType = ActorType.AT_BOSS;
+            }
+
+            mIsBoss = mActorType == ActorType.AT_BOSS;
+            
+            m_TeamType = 3;
+
+            m_move = this.gameObject.GetComponent<ServerPlayerMove>();
+            if (m_move == null)
+            {
+                m_move = this.gameObject.AddComponent<ServerPlayerMove>();
+            }
+            m_move.DoInit(this);
+
+            //BOSS才加这个。小怪没必要
+            if (mActorType == ActorType.AT_BOSS)
+            {
+                m_StoryStandState = this.gameObject.GetComponent<StoryStandState>();
+                if (null == m_StoryStandState)
+                {
+                    m_StoryStandState = this.gameObject.AddComponent<StoryStandState>();
+                }
+                m_StoryPlayAnimState = this.gameObject.GetComponent<StoryPlayAnimState>();
+                if (null == m_StoryPlayAnimState)
+                {
+                    m_StoryPlayAnimState = this.gameObject.AddComponent<StoryPlayAnimState>();
+                }
+                m_StoryPlayAnimLoopState = this.gameObject.GetComponent<StoryPlayAnimLoopState>();
+                if (null == m_StoryPlayAnimLoopState)
+                {
+                    m_StoryPlayAnimLoopState = this.gameObject.AddComponent<StoryPlayAnimLoopState>();
+                }
+
+            }
+
+            Animation animation = GetComponent<Animation>();
+            if(null != animation)
+            {
+                animation.enabled = true;
+            }
+            //动画更新优化
+            if (mActorType == ActorType.AT_MONSTER)
+            {
+                m_moveAni = gameObject.GetComponent<MoveAnimation>();
+                if (null == m_moveAni)
+                {
+                    m_moveAni = gameObject.AddComponent<MoveAnimation>();
+                }
+            }
+
+
+            //m_move.Init();
+
+            if (null != m_MonsterConfig)
+            {
+                m_iHitTurn = m_MonsterConfig.Get<int>("hit_turn");
+                m_bodyType = m_MonsterConfig.Get<int>("size");
+           //     m_DieSound = m_MonsterConfig.Get<int>("DeathSound");
+             //   m_CanKnock = m_MonsterConfig.Get<int>("can_knock");
+                mBaseAttr.Speed = m_MonsterConfig.Get<int>("chase_speed");
+                SetSpeed(mBaseAttr.Speed);
+
+                string foot_effect = m_MonsterConfig.Get<string>("foot_pfx");
+                if(!string.IsNullOrEmpty(foot_effect))
+                {
+                    m_footEffect = CoreEntry.gGameObjPoolMgr.Instantiate(foot_effect);
+                    if(null != m_footEffect)
+                    {
+                        CapsuleCollider collider = GetComponent<CapsuleCollider>();
+                        float scale = 1.0f;
+                        if(null != collider)
+                        {
+                            scale = collider.radius * 0.9f;
+                        }
+                        scale = Mathf.Min(scale, 1.2f);
+
+                        m_footEffect.transform.parent = transform;
+                        m_footEffect.transform.localPosition = new Vector3(0, 0.1f, 0);
+                        m_footEffect.transform.localRotation = Quaternion.identity;
+                        m_footEffect.transform.localScale = Vector3.one * scale;
+                    }
+                }
+            }
+            OnPostInit();
+
+            CommonTools.SetLayer(this.gameObject, LayerMask.NameToLayer("monster"));
+        }
+
+        public void InitAttr(MsgData_sSceneObjectEnterMonster es)
+        {
+            mBaseAttr.InitMonsterAttr(es);
+            if (mHealth != null)
+            {
+                mHealth.OnResetHP();
+            }
+        }
+
+        // Use this for initialization
+        void Start()
+        {
+
+        }
+
+        // Update is called once per frame
+        //void Update()
+        //{
+
+        //}
+
+
+        public void VipIsUnderAttack()
+        {
+            CancelInvoke("AttackTimeOut");
+            IsUnderAttackAsVip = true;
+            Invoke("AttackTimeOut", StandTimeWhenBehitAsVip);
+        }
+
+        void AttackTimeOut()
+        {
+            CancelInvoke("AttackTimeOut");
+            IsUnderAttackAsVip = false;
+        }
+
+        public override void DoDamage(int hp, bool bIsMainPlayer, BehitParam behitParam)//lmjedit 真正的暴击 
+        {
+            base.DoDamage(hp, bIsMainPlayer, behitParam);
+            if (mActorType == ActorType.AT_BOSS)
+            {
+                //UIEventMgr.SetArg(UIEventParam.Param1, curHp * 1.0f / maxHp);
+                //UIEventMgr.SetArg(UIEventParam.Param2, behitParam);
+                //UIEventMgr.SendEvent("EU_BOSSBLOOD_SETVALUE");
+            }
+        }
+
+        //获取碰撞体半径
+        public override float GetColliderRadius()
+        {
+            if (m_capCollider != null)
+            {
+                return m_capCollider.radius * transform.localScale.x;
+            }
+
+            if (m_boxCollider != null)
+            {
+                return Mathf.Min(m_boxCollider.size.x, m_boxCollider.size.z) * transform.localScale.x;
+            }
+
+            return 0.5f;
+        }
+
+        public override Vector3 GetBoxColliderSize()
+        {
+            Vector3 boxSize = Vector3.zero;
+
+            if (m_boxCollider)
+            {
+                boxSize = m_boxCollider.size;
+            }
+
+            return boxSize;
+        }
+
+        public override Collider GetCollider()
+        {
+            if (m_colliderType == Collider_Type.CT_BOX)
+            {
+                return m_boxCollider;
+            }
+            else if (m_colliderType == Collider_Type.CT_CAPSULE)
+            {
+                return m_capCollider;
+            }
+
+            return null;
+        }
+
+        public override float GetDeathDuration()
+        {
+            return m_MonsterConfig.Get<int>("lying_time");
+        }
+
+        void RegisterEvent()
+        {
+            //怪物,boss,npc的
+            CoreEntry.gEventMgr.AddListener(GameEvent.GE_ACTOR_CAN_BEHIT, EventFunction);
+            CoreEntry.gEventMgr.AddListener(GameEvent.GE_MONSTER_DEATH, EventFunction);
+
+            CoreEntry.gEventMgr.AddListener(GameEvent.GE_CC_GameGraphicSetting, OnChangeGrphicQuality);
+
+            CoreEntry.gEventMgr.AddListener(GameEvent.GE_PVP_PLAYER_RECOVER, EventFunction);
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            RemoveEvent();
+            m_capCollider = null;
+            m_boxCollider = null;
+            m_MonsterConfig = null;
+        }
+
+        void RemoveEvent()
+        {
+            //怪物,boss,npc的
+            CoreEntry.gEventMgr.RemoveListener(GameEvent.GE_ACTOR_CAN_BEHIT, EventFunction);
+            CoreEntry.gEventMgr.RemoveListener(GameEvent.GE_MONSTER_DEATH, EventFunction);
+            CoreEntry.gEventMgr.RemoveListener(GameEvent.GE_CC_GameGraphicSetting, OnChangeGrphicQuality);
+
+
+            CoreEntry.gEventMgr.RemoveListener(GameEvent.GE_PVP_PLAYER_RECOVER, EventFunction);
+        }
+        void OnChangeGrphicQuality(GameEvent ge, EventParameter paramter)
+        {
+            if (m_blodShadow != null)
+            {
+                //m_shadowType = QualitySetting.IsLowQuality ? 1 : 2;
+                m_blodShadow.ChangeShow(m_shadowType);
+            }
+        }
+        public override CActorObject AutoSelTarget(float fDis)
+        {
+            return m_SelectTargetObject;
+        }
+
+
+        void EventFunction(GameEvent ge, EventParameter parameter)
+        {
+            switch (ge)
+            {
+                case GameEvent.GE_ACTOR_CAN_BEHIT:
+                    {
+
+                    }
+                    break;
+                case GameEvent.GE_MONSTER_DEATH:
+                    {
+
+                        if (parameter.intParameter != entityid)
+                        {
+                            break;
+                        }
+
+                        ////自己死亡
+                        //if (mActorType == ActorType.AT_BOSS)
+                        //{
+                        //    UIEventMgr.SendEvent("EU_BOSSBLOOD_HIDE");
+                        //}
+                    }
+                    break;
+
+                //PVP玩家复活
+                case GameEvent.GE_PVP_PLAYER_RECOVER:
+                    {
+                        if (parameter.intParameter != entityid)
+                        {
+                            break;
+                        }
+
+                        StateParameter param = new StateParameter();
+                        param.state = ACTOR_STATE.AS_STAND;
+                        param.skillID = 1;
+
+                        bool ret = RequestChangeState(param);
+                        if (ret)
+                        {
+                            //todo，属性恢复  
+                            Recover();
+
+                        }
+
+                    }
+                    break;
+
+
+                default:
+                    break;
+            }
+        }
+
+        public override void RecycleObj()
+        {
+
+            if (null != m_moveAni)
+            {
+                Destroy(m_moveAni);
+            }
+
+            if (null != m_footEffect)
+            {
+                CoreEntry.gGameObjPoolMgr.Destroy(m_footEffect);
+            }
+            base.RecycleObj();
+
+            StartMove_test_ex(0, 0, null);
+        }
+
+        //计算时间
+        private bool StartMove_test_ex(float time, float distance, CActorObject attacker)
+        {
+            float mDuration = time;
+            Vector3 mStartPos = Vector3.zero;
+            Vector3 dir;
+
+            if (null != attacker)
+            {
+                dir = (attacker.transform.position - mStartPos).normalized;
+            }
+            else
+            {
+                dir = Vector3.forward;
+            }
+
+            if (attacker == null)
+                return false;
+
+
+            int TempValue = 0;
+            int RandomValue = 0;
+
+            int num = 0;
+            if (TempValue != 0 || RandomValue != 0)
+            {
+                bool isCount = TempValue % 2 == 0;
+                num = TempValue * (isCount ? -1 : 1);
+                num -= RandomValue;
+            }
+
+            AnimationCurveData m_animationCurveData = null;
+            string strClipName = "";
+            CurveData curveData = m_animationCurveData.GetCurveData(strClipName);
+            if (curveData == null)
+            {
+                LogMgr.LogError("can't find {0} curve data", strClipName);
+                return false;
+            }
+
+            List<float> listValueX = new List<float>();
+            List<float> listValueY = new List<float>();
+            List<float> listValueZ = new List<float>();
+            List<float> listTime = new List<float>();
+
+            List<Keyframe> listKeyFrameX = new List<Keyframe>();
+            List<Keyframe> listKeyFrameY = new List<Keyframe>();
+            List<Keyframe> listKeyFrameZ = new List<Keyframe>();
+
+
+            Vector3 pos1 = new Vector3(listValueX[0], listValueY[0], listValueZ[0]);
+            Vector3 pos2 = new Vector3(listValueX[listValueX.Count - 1],
+                listValueY[listValueX.Count - 1], listValueZ[listValueX.Count - 1]);
+
+            //缩放系数        
+            float distanceA = Vector3.Distance(pos1, pos2);
+            float distanceB = Vector3.Distance(pos1, pos2);
+
+
+            //是否有卡帧系数
+            if (curveData.keyIndex > 0 & curveData.keyIndex < listValueX.Count - 1)
+            {
+                //卡帧前面的位移
+                Vector3 pos3 = new Vector3(listValueX[curveData.keyIndex], listValueY[0], listValueZ[curveData.keyIndex]);
+                float distanceC = Vector3.Distance(pos1, pos3);
+
+                //LogMgr.UnityLog("distanceC=" + distanceC);
+
+                if (distanceA > distanceC)
+                {
+                    distanceA -= distanceC;
+                    distanceB -= distanceC;
+
+                }
+            }
+
+            float fscale = distanceA / distanceB;
+            if (Mathf.Approximately(distanceB, 0) || fscale <= 0)
+            {
+                fscale = 1f;
+            }
+
+            //LogMgr.UnityLog("distanceA=" + distanceA + ", distanceB=" + distanceB + ", fscale=" + fscale);
+
+            //使用点的旋转            
+            List<Vector3> listCurvePos = new List<Vector3>();
+            for (int i = 0; i < 1; ++i)
+            {
+                Vector3 pos = new Vector3(listValueX[i], listValueY[i], listValueZ[i]);
+
+                //缩放
+                if (curveData.keyIndex > 0 && curveData.keyIndex < listValueX.Count - 1)
+                {
+                    //后面的缩放
+                    if (i > curveData.keyIndex)
+                    {
+                        pos.Scale(new Vector3(fscale, 1, fscale));
+                        pos += new Vector3(listValueX[curveData.keyIndex], pos.y, listValueZ[curveData.keyIndex]);
+                    }
+                }
+                else
+                {
+                    pos.Scale(new Vector3(fscale, 1f, fscale));
+                }
+
+                //自身旋转
+
+                listCurvePos.Add(pos);
+            }
+
+            //计算玩家方向
+            Vector3 maxPos = mStartPos - dir * distance;
+            Vector3 mTargetPos = CoreEntry.gBaseTool.GetLineReachablePos(mStartPos, maxPos);
+            Vector3 mDeltaPos = (mTargetPos - mStartPos) / mDuration;
+            float mStartTime = Time.time;
+
+            if (mStartTime > 0)
+                return false;
+
+            EndMove_test_ex(0, 0, null);
+
+            return true;
+        }
+
+        private bool EndMove_test_ex(float time, float distance, CActorObject attacker)
+        {
+            //临时计算时间
+            float mDuration1 = time;
+            Vector3 mStartPos1 = Vector3.zero;
+            Vector3 dir;
+
+            if (null != attacker)
+            {
+                dir = (attacker.transform.position - mStartPos1).normalized;
+            }
+            else
+            {
+                dir = Vector3.forward;
+            }
+
+            //计算玩家方向
+            Vector3 maxPos = mStartPos1 - dir * distance;
+            Vector3 mTargetPos = CoreEntry.gBaseTool.GetLineReachablePos(mStartPos1, maxPos);
+            Vector3 mDeltaPos = (mTargetPos - mStartPos1) / mDuration1;
+            float mStartTime = Time.time;
+
+            if (mStartTime > 0)
+                return false;
+
+            return true;
+        }
+   
+}
+}

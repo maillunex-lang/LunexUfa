@@ -1,0 +1,34 @@
+﻿ANDROID target=Android
+ANDROID_INSPECT begin target=Android version=2017.4.30f1
+BASELINE scene=Assets/Scene/allMap/ui/ThirdPartyUI.unity objects=9 missingScripts=0 missingShaders=0 animators=0 animatorsWithoutController=0
+BASELINE scene=Assets/Scene/allMap/ui/LoginUI.unity objects=1 missingScripts=0 missingShaders=0 animators=0 animatorsWithoutController=0
+Animator without controller: UIRoot3D/thing/cs_denglu_jiaodi01
+Animator without controller: UIRoot3D/RoleUI/cs_juese_pingtai001/Camera
+Animator without controller: UIRoot3D/RoleUI/cs_juese_pingtai001/Camera
+Missing script: RoleRsPlugin
+WATCHED_MISSING_SCRIPT object=RoleRsPlugin
+WATCHED_OBJECT scene=Assets/Scene/allMap/ui/RoleUI.unity path=RoleRsPlugin components=2 monoBehaviours=1
+BASELINE scene=Assets/Scene/allMap/ui/RoleUI.unity objects=69 missingScripts=1 missingShaders=0 animators=7 animatorsWithoutController=3
+Animator without controller: cs_haitan/thing/cs_haitan_diaoxiang02 (2)
+Animator without controller: cs_haitan/thing/cs_haitan_diaoxiang02 (3)
+Animator without controller: cs_haitan/thing/cs_haitan_diaoxiang02 (5)
+Animator without controller: cs_haitan/thing/cs_haitan_chuan01
+Animator without controller: cs_haitan/thing/cs_haitan_chuan01 (1)
+Animator without controller: cs_haitan/thing/cs_haitan_chuan01 (2)
+Animator without controller: cs_haitan/thing/cs_haitan_diaoxiang02 (6)
+Animator without controller: cs_haitan/thing/cs_haitan_chuan01 (4)
+Animator without controller: cs_haitan/thing/cs_haitan_chuan01 (3)
+Animator without controller: cs_haitan/thing/cs_haitan_chuan01 (5)
+Animator without controller: cs_haitan/thing/cs_haitan_diaoxiang02 (4)
+Animator without controller: cs_haitan/thing/cs_haitan_diaoxiang02 (7)
+Animator without controller: cs_haitan/thing/cs_haitan_diaoxiang02 (8)
+Animator without controller: cs_haitan/thing/cs_haitan_diaoxiang02 (9)
+Missing script: GameDrawManager
+WATCHED_MISSING_SCRIPT object=GameDrawManager
+WATCHED_OBJECT scene=Assets/Scene/allMap/cs_yw_haitan01/cs_yw_haitan01.unity path=GameDrawManager components=3 monoBehaviours=1
+Missing script: HT1RsPlugin
+WATCHED_MISSING_SCRIPT object=HT1RsPlugin
+WATCHED_OBJECT scene=Assets/Scene/allMap/cs_yw_haitan01/cs_yw_haitan01.unity path=HT1RsPlugin components=2 monoBehaviours=1
+BASELINE scene=Assets/Scene/allMap/cs_yw_haitan01/cs_yw_haitan01.unity objects=1558 missingScripts=2 missingShaders=0 animators=14 animatorsWithoutController=14
+ANDROID_INSPECT end
+Exiting batchmode successfully now!

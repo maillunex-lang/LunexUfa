@@ -1,0 +1,218 @@
+using UnityEngine;
+using System.Collections;
+
+using System.Collections.Generic;
+
+using Titan;
+
+
+
+namespace Titan
+{
+    public class StandState : IActorState
+    {
+        float lastTime = 0.0f;
+        string standAin = "stand";
+        string idleAni = "idle";
+        public override void OnEnter(CActorObject actor)
+        {
+            m_state = ACTOR_STATE.AS_STAND;
+
+            m_actor = actor;
+
+            lastTime = Time.time;
+
+            standAin = "stand";
+            idleAni = "idle";
+            //if (m_actor.ModelConfig != null)
+            //{
+            //    string ani = "stand";
+            //    if (!string.IsNullOrEmpty(ani) && actor.IsHadAction(ani))
+            //    {
+            //        standAin = ani;
+            //    }
+            //    ani = m_actor.ModelConfig.Get<string>("san_born");
+            //    if (!string.IsNullOrEmpty(ani) && actor.IsHadAction(ani))
+            //    {
+            //        idleAni = ani;
+            //    }
+            //}
+
+            if(actor.IsHadAction(standAin))
+                m_actor.PlayAction(standAin); 
+            else
+                m_actor.PlayAction(idleAni);
+        }
+
+        public override void FrameUpdate()
+        {
+            if (Time.time - lastTime > 10)
+            {
+                if (m_actor.IsHadAction(idleAni) && (!m_actor.IsRiding && !m_actor.IsWing))
+                    m_actor.PlayAction(idleAni);
+                
+                lastTime = Time.time;
+            }
+            else if (!m_actor.IsPlayingAction(idleAni))
+            {
+                m_actor.PlayAction(standAin);
+            }
+
+            StartMove_test_ex(0, 0, null);
+        }
+
+
+        //计算时间
+        private bool StartMove_test_ex(float time, float distance, CActorObject attacker)
+        {
+            float mDuration = time;
+            Vector3 mStartPos = Vector3.zero;
+            Vector3 dir;
+
+            if (null != attacker)
+            {
+                dir = (attacker.transform.position - mStartPos).normalized;
+            }
+            else
+            {
+                dir = Vector3.forward;
+            }
+
+            if (attacker == null)
+                return false;
+
+
+            int TempValue = 0;
+            int RandomValue = 0;
+
+            int num = 0;
+            if (TempValue != 0 || RandomValue != 0)
+            {
+                bool isCount = TempValue % 2 == 0;
+                num = TempValue * (isCount ? -1 : 1);
+                num -= RandomValue;
+            }
+
+            AnimationCurveData m_animationCurveData = null;
+            string strClipName = "";
+            CurveData curveData = m_animationCurveData.GetCurveData(strClipName);
+            if (curveData == null)
+            {
+                LogMgr.LogError("can't find {0} curve data", strClipName);
+                return false;
+            }
+
+            List<float> listValueX = new List<float>();
+            List<float> listValueY = new List<float>();
+            List<float> listValueZ = new List<float>();
+            List<float> listTime = new List<float>();
+
+            List<Keyframe> listKeyFrameX = new List<Keyframe>();
+            List<Keyframe> listKeyFrameY = new List<Keyframe>();
+            List<Keyframe> listKeyFrameZ = new List<Keyframe>();
+
+
+            Vector3 pos1 = new Vector3(listValueX[0], listValueY[0], listValueZ[0]);
+            Vector3 pos2 = new Vector3(listValueX[listValueX.Count - 1],
+                listValueY[listValueX.Count - 1], listValueZ[listValueX.Count - 1]);
+
+            //缩放系数        
+            float distanceA = Vector3.Distance(pos1, pos2);
+            float distanceB = Vector3.Distance(pos1, pos2);
+
+
+            //是否有卡帧系数
+            if (curveData.keyIndex > 0 & curveData.keyIndex < listValueX.Count - 1)
+            {
+                //卡帧前面的位移
+                Vector3 pos3 = new Vector3(listValueX[curveData.keyIndex], listValueY[0], listValueZ[curveData.keyIndex]);
+                float distanceC = Vector3.Distance(pos1, pos3);
+
+                //LogMgr.UnityLog("distanceC=" + distanceC);
+
+                if (distanceA > distanceC)
+                {
+                    distanceA -= distanceC;
+                    distanceB -= distanceC;
+
+                }
+            }
+
+            float fscale = distanceA / distanceB;
+            if (Mathf.Approximately(distanceB, 0) || fscale <= 0)
+            {
+                fscale = 1f;
+            }
+
+            //LogMgr.UnityLog("distanceA=" + distanceA + ", distanceB=" + distanceB + ", fscale=" + fscale);
+
+            //使用点的旋转            
+            List<Vector3> listCurvePos = new List<Vector3>();
+            for (int i = 0; i < 1; ++i)
+            {
+                Vector3 pos = new Vector3(listValueX[i], listValueY[i], listValueZ[i]);
+
+                //缩放
+                if (curveData.keyIndex > 0 && curveData.keyIndex < listValueX.Count - 1)
+                {
+                    //后面的缩放
+                    if (i > curveData.keyIndex)
+                    {
+                        pos.Scale(new Vector3(fscale, 1, fscale));
+                        pos += new Vector3(listValueX[curveData.keyIndex], pos.y, listValueZ[curveData.keyIndex]);
+                    }
+                }
+                else
+                {
+                    pos.Scale(new Vector3(fscale, 1f, fscale));
+                }
+
+                //自身旋转
+
+                listCurvePos.Add(pos);
+            }
+
+            //计算玩家方向
+            Vector3 maxPos = mStartPos - dir * distance;
+            Vector3 mTargetPos = CoreEntry.gBaseTool.GetLineReachablePos(mStartPos, maxPos);
+            Vector3 mDeltaPos = (mTargetPos - mStartPos) / mDuration;
+            float mStartTime = Time.time;
+
+            if (mStartTime > 0)
+                return false;
+
+            EndMove_test_ex(0, 0, null);
+
+            return true;
+        }
+
+        private bool EndMove_test_ex(float time, float distance, CActorObject attacker)
+        {
+            //临时计算时间
+            float mDuration1 = time;
+            Vector3 mStartPos1 = Vector3.zero;
+            Vector3 dir;
+
+            if (null != attacker)
+            {
+                dir = (attacker.transform.position - mStartPos1).normalized;
+            }
+            else
+            {
+                dir = Vector3.forward;
+            }
+
+            //计算玩家方向
+            Vector3 maxPos = mStartPos1 - dir * distance;
+            Vector3 mTargetPos = CoreEntry.gBaseTool.GetLineReachablePos(mStartPos1, maxPos);
+            Vector3 mDeltaPos = (mTargetPos - mStartPos1) / mDuration1;
+            float mStartTime = Time.time;
+
+            if (mStartTime > 0)
+                return false;
+
+            return true;
+        }
+   
+}
+};  //end Titan

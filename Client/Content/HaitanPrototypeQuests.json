@@ -1,0 +1,32 @@
+{
+    "source":  "Server-Windows/data/config/QuestConfig.lua",
+    "quests":  [
+                   {
+                       "id":  1001701,
+                       "nextQuestId":  1001702,
+                       "finishNpcId":  201001001,
+                       "legacyGoal":  "",
+                       "experience":  1040,
+                       "money":  1000,
+                       "autoAccept":  true
+                   },
+                   {
+                       "id":  1001702,
+                       "nextQuestId":  1001703,
+                       "finishNpcId":  0,
+                       "legacyGoal":  "180,1",
+                       "experience":  550,
+                       "money":  1050,
+                       "autoAccept":  true
+                   },
+                   {
+                       "id":  1001703,
+                       "nextQuestId":  1001704,
+                       "finishNpcId":  0,
+                       "legacyGoal":  "100101001,3",
+                       "experience":  550,
+                       "money":  1050,
+                       "autoAccept":  true
+                   }
+               ]
+}
