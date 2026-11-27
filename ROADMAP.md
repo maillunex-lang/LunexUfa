@@ -7,7 +7,9 @@
 
 1. Канон с подзадачами PORT-срезов:  
    **`C:\LegacyOfEternity\Docs\ROADMAP.md`**  
-   (+ `Docs/PORT-MANIFEST.md`, `Docs/CURRENT-STATUS.md`).
+   (+ `Docs/PORT-MANIFEST.md`, `Docs/CURRENT-STATUS.md).
+
+Активно: **PORT-06** Haitan MapData start (APK 0.10.0) — без демо-арен.
 2. Источники арта/конфигов: `C:\Source\Resources`, `C:\Source\Darklord-Final`, этот baseline.  
 3. Этот файл — только указатель лаборатории. **Не** вести здесь параллельный клиентский план.
 
@@ -18,3 +20,4 @@
 - Content / Baseline  
 
 Не собирать основной APK из `Client/` Unity 2017.
+
